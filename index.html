@@ -1,1 +1,76 @@
-Hello World
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+
+<script>
+
+var myGameArea = {
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = 1440;
+        this.canvas.height = 810;
+        this.frameNo = 0;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.interval = setInterval(updateGameArea, 20);
+        window.addEventListener('keydown', function (e) {
+            myGameArea.keys = (myGameArea.keys || []);
+            myGameArea.keys[e.keyCode] = (e.type == "keydown");
+        })
+        window.addEventListener('keyup', function (e) {
+            myGameArea.keys[e.keyCode] = (e.type == "keydown");
+        })
+    },
+    clear : function(){
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+}
+
+function updateGameArea(){
+  myGameArea.clear();
+  var player1 = new component(300,30,"black",300,500,null);	
+
+  player1.update();
+}
+
+function component(width,height,color,x,y,type) {
+	this.width=width;
+	this.height=height;
+	this.color=color;
+	this.x=x;
+	this.y=y;
+	this.type=type;	
+
+  this.update = function() {
+        ctx = myGameArea.context;
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+
+}
+
+function clear() {
+    myGameArea.clear();
+}
+
+function startGame(){
+	myGameArea.start();
+}
+
+</script>
+
+<body onload="startGame();">
+<p>text</p>
+</body>
+
+</html>
