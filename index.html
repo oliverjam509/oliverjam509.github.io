@@ -7,9 +7,11 @@
 
 <style>
 canvas {
-    border:1px solid #d3d3d3;
-    background-color: #f1f1f1;
+    background-color: #D78B7B;
 }
+
+body { margin:0; text-align: center; }
+
 </style>
 
 <script>
@@ -17,7 +19,7 @@ canvas {
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
-        this.canvas.width = 1440;
+        this.canvas.width = screen.width;
         this.canvas.height = 810;
         this.frameNo = 0;
         this.context = this.canvas.getContext("2d");
@@ -38,10 +40,21 @@ var myGameArea = {
 
 function updateGameArea(){
   myGameArea.clear();
-  var player1 = new component(300,30,"black",300,500,null);	
+  var x = screen.width/2;
+  var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
+  var block2 = new component(500,30,"black",150,300,null);
+  var block3 = new component(500,30,"black",1300,300,null);
+  var x = 50;
+  var block4 = new component(50,150,"blue",(screen.width-x)/2,300,null);
 
-  player1.update();
+
+
+  block1.update();
+  block2.update();
+  block3.update();
+  block4.update();
 }
+
 
 function component(width,height,color,x,y,type) {
 	this.width=width;
@@ -70,7 +83,8 @@ function startGame(){
 </script>
 
 <body onload="startGame();">
-<p>text</p>
+<p>my game</p>
+<h1>Controls are-</h1>
 </body>
 
 </html>
