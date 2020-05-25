@@ -15,6 +15,8 @@ body { margin:0; text-align: center; }
 </style>
 
 <script>
+var player1 = new component(50,50,"blue",900,300,null);
+var mov = -100;
 
 var myGameArea = {
     canvas : document.createElement("canvas"),
@@ -39,20 +41,34 @@ var myGameArea = {
 }
 
 function updateGameArea(){
-  myGameArea.clear();
-  var x = screen.width/2;
-  var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
-  var block2 = new component(500,30,"black",150,300,null);
-  var block3 = new component(500,30,"black",1300,300,null);
-  var x = 50;
-  var block4 = new component(50,150,"blue",(screen.width-x)/2,300,null);
+  // var x = screen.width/2;
+  // var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
+  // var block2 = new component(500,30,"black",150,300,null);
+  // var block3 = new component(500,30,"black",1300,300,null);
+  // var x = 50;
+  // var block4 = new component(50,150,"blue",(screen.width-x)/2,300,null)
 
 
 
-  block1.update();
-  block2.update();
-  block3.update();
-  block4.update();
+  // block1.update();
+  // block2.update();
+  // block3.update();
+  // block4.update();
+    myGameArea.clear();
+    myGameArea.frameNo = myGameArea.frameNo+1;
+
+    if(player1.x <= 0 || player1.x >= screen.width){
+        mov *= -1;
+    }
+
+    player1.x += mov;
+
+    player1.update();
+}
+
+function start(){
+  
+
 }
 
 
@@ -78,6 +94,7 @@ function clear() {
 
 function startGame(){
 	myGameArea.start();
+    
 }
 
 </script>
