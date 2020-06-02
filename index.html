@@ -41,36 +41,61 @@ var myGameArea = {
 }
 
 function updateGameArea(){
-  // var x = screen.width/2;
-  // var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
-  // var block2 = new component(500,30,"black",150,300,null);
-  // var block3 = new component(500,30,"black",1300,300,null);
-  // var x = 50;
-  // var block4 = new component(50,150,"blue",(screen.width-x)/2,300,null)
 
+    document.getElementById("p1").innerHTML = myGameArea.keys && myGameArea.keys[65];
 
+    var x = screen.width/2;
+    var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
+    var block2 = new component(500,30,"black",150,300,null);
+    var block3 = new component(500,30,"black",1300,300,null);
+    var x = 50;
+   
+    // [A,D,W,S]
+    var controls = [65,68,87,83];
+     
+    updatePlayerPosition(player1, controls);
 
-  // block1.update();
-  // block2.update();
-  // block3.update();
-  // block4.update();
     myGameArea.clear();
+
     myGameArea.frameNo = myGameArea.frameNo+1;
 
-    if(player1.x <= 0 || player1.x >= screen.width){
-        mov *= -1;
-    }
-
-    player1.x += mov;
+    boundsCheck(player1);
 
     player1.update();
+    block1.update();
+    block2.update();
+    block3.update();
+
 }
 
-function start(){
-  
-
+function updatePlayerPosition(player, controls){
+    var spd = 10;
+    if ((myGameArea.keys && myGameArea.keys[controls[0]])) {
+        player.x -= spd;
+    }
+    if ((myGameArea.keys && myGameArea.keys[controls[1]])) {
+        player.x += spd;
+    }
+    if ((myGameArea.keys && myGameArea.keys[controls[2]])) {
+        player.y -= spd;
+    }
+        if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
+        player.y += spd;
+    }  
 }
 
+function boundsCheck(sweatynerd){
+    if(sweatynerd.x<0){
+        sweatynerd.x=screen.width;
+    }
+    if(sweatynerd.x>screen.width){
+        sweatynerd.x=0;
+    }
+    if (sweatynerd.y>myGameArea.canvas.height){
+        sweatynerd.y = myGameArea.canvas.height-sweatynerd.height;
+    }
+    
+}
 
 function component(width,height,color,x,y,type) {
 	this.width=width;
@@ -80,12 +105,30 @@ function component(width,height,color,x,y,type) {
 	this.y=y;
 	this.type=type;	
 
-  this.update = function() {
+    this.update = function() {
         ctx = myGameArea.context;
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
-      }
+    }
 
+    this.crashWith = function(otherobj) {
+      var myleft = this.x;
+      var myright = this.x + (this.width);
+      var mytop = this.y;
+      var mybottom = this.y + (this.height);
+      var otherleft = otherobj.x;
+      var otherright = otherobj.x + (otherobj.width);
+      var othertop = otherobj.y;
+      var otherbottom = otherobj.y + (otherobj.height);
+      var crash = true;
+      if ((mybottom < othertop) ||
+      (mytop > otherbottom) ||
+      (myright < otherleft) ||
+      (myleft > otherright)) {
+        crash = false;
+      }
+      return crash;
+    }
 }
 
 function clear() {
@@ -100,8 +143,10 @@ function startGame(){
 </script>
 
 <body onload="startGame();">
-<p>my game</p>
+
+<p id="p1">my game</p>
 <h1>Controls are-</h1>
+
 </body>
 
 </html>
