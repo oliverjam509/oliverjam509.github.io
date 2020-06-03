@@ -15,7 +15,10 @@ body { margin:0; text-align: center; }
 </style>
 
 <script>
+var x = screen.width/2;
 var player1 = new component(50,50,"blue",900,300,null);
+var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
+
 var mov = -100;
 
 var myGameArea = {
@@ -42,10 +45,10 @@ var myGameArea = {
 
 function updateGameArea(){
 
-    document.getElementById("p1").innerHTML = myGameArea.keys && myGameArea.keys[65];
+    player1.speedX = 0;
+    player1.speedY = 0;
 
-    var x = screen.width/2;
-    var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
+  
     var block2 = new component(500,30,"black",150,300,null);
     var block3 = new component(500,30,"black",1300,300,null);
     var x = 50;
@@ -59,29 +62,48 @@ function updateGameArea(){
 
     myGameArea.frameNo = myGameArea.frameNo+1;
 
+
     boundsCheck(player1);
+
+    player1.gravitySpeed += player1.gravity;
+    player1.speedY += player1.gravitySpeed;
+
+    player1.speedY += player1.js;
+
+    if(player1.crashWith(block1) && player1.cj != true){
+        player1.gravitySpeed = 0.1;
+        if(player1.speedY > 0){
+            player1.speedY = 0;
+        } 
+    }
+
+    player1.x += player1.speedX;
+    player1.y += player1.speedY;
 
     player1.update();
     block1.update();
     block2.update();
     block3.update();
-
 }
 
 function updatePlayerPosition(player, controls){
     var spd = 10;
     if ((myGameArea.keys && myGameArea.keys[controls[0]])) {
-        player.x -= spd;
+        player.speedX = -spd;
     }
     if ((myGameArea.keys && myGameArea.keys[controls[1]])) {
-        player.x += spd;
+        player.speedX = spd;
     }
     if ((myGameArea.keys && myGameArea.keys[controls[2]])) {
-        player.y -= spd;
+        if (player1.crashWith(block1)){
+            player1.js = -20; 
+        }
+        document.getElementById("p1").innerHTML = player1.js;
+
     }
-        if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
-        player.y += spd;
-    }  
+    if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
+        player.speedY = spd;
+    }
 }
 
 function boundsCheck(sweatynerd){
@@ -91,10 +113,12 @@ function boundsCheck(sweatynerd){
     if(sweatynerd.x>screen.width){
         sweatynerd.x=0;
     }
-    if (sweatynerd.y>myGameArea.canvas.height){
-        sweatynerd.y = myGameArea.canvas.height-sweatynerd.height;
+    if (sweatynerd.y>=myGameArea.canvas.height-sweatynerd.height){
+        sweatynerd.y = 0;
     }
-    
+    if (sweatynerd.y<0){
+        sweatynerd.y = myGameArea.canvas.height;
+    }
 }
 
 function component(width,height,color,x,y,type) {
@@ -104,6 +128,12 @@ function component(width,height,color,x,y,type) {
 	this.x=x;
 	this.y=y;
 	this.type=type;	
+    this.gravity =1;
+    this.gravitySpeed = 0;
+    this.speedX =0;
+    this.speedY =0;
+    this.js =0;
+    this.cj =false;
 
     this.update = function() {
         ctx = myGameArea.context;
@@ -130,6 +160,7 @@ function component(width,height,color,x,y,type) {
       return crash;
     }
 }
+
 
 function clear() {
     myGameArea.clear();
