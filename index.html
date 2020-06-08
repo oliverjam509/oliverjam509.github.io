@@ -2,9 +2,12 @@
 <html>
 
 <head>
-
+<!-- name of tab  -->
+<title>Battle Grounds</title> 
 </head>
 
+<!-- style tags are css -->
+<!-- the backround colour of the variable myGameArea-->
 <style>
 canvas {
     background-color: #D78B7B;
@@ -15,9 +18,13 @@ body { margin:0; text-align: center; }
 </style>
 
 <script>
+// these are global variables they are outside functions
 var x = screen.width/2;
 var player1 = new component(50,50,"blue",900,300,null);
 var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
+var block2 = new component(500,30,"black",50,500,null);
+var block3 = new component(500,30,"black",1300,500,null);
+var blocks = [block1,block2,block3];
 
 var mov = -100;
 
@@ -45,12 +52,11 @@ var myGameArea = {
 
 function updateGameArea(){
 
-    player1.speedX = 0;
-    player1.speedY = 0;
+    myGameArea.clear();
 
-  
-    var block2 = new component(500,30,"black",150,300,null);
-    var block3 = new component(500,30,"black",1300,300,null);
+    
+
+   
     var x = 50;
    
     // [A,D,W,S]
@@ -58,24 +64,7 @@ function updateGameArea(){
      
     updatePlayerPosition(player1, controls);
 
-    myGameArea.clear();
-
-    myGameArea.frameNo = myGameArea.frameNo+1;
-
-
     boundsCheck(player1);
-
-    player1.gravitySpeed += player1.gravity;
-    player1.speedY += player1.gravitySpeed;
-
-    player1.speedY += player1.js;
-
-    if(player1.crashWith(block1) && player1.cj != true){
-        player1.gravitySpeed = 0.1;
-        if(player1.speedY > 0){
-            player1.speedY = 0;
-        } 
-    }
 
     player1.x += player1.speedX;
     player1.y += player1.speedY;
@@ -88,21 +77,44 @@ function updateGameArea(){
 
 function updatePlayerPosition(player, controls){
     var spd = 10;
+    player.speedX = 0;
+    player.speedY = 0;
+    player.gravitySpeed += player.gravity;
+    player.speedY += player.gravitySpeed;
+    player.speedY += player.js;
+
     if ((myGameArea.keys && myGameArea.keys[controls[0]])) {
         player.speedX = -spd;
     }
     if ((myGameArea.keys && myGameArea.keys[controls[1]])) {
         player.speedX = spd;
     }
+    // jump
     if ((myGameArea.keys && myGameArea.keys[controls[2]])) {
-        if (player1.crashWith(block1)){
-            player1.js = -20; 
+        if (player1.cj == true){
+            player1.js = -20;
+            player1.y += player1.js; 
+            player1.cj = false;
         }
-        document.getElementById("p1").innerHTML = player1.js;
-
     }
     if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
         player.speedY = spd;
+    }
+
+    var x;
+
+    for(x = 0; x <= blocks.length-1; x++){
+        document.getElementById("p1").innerHTML = x;
+        var b = blocks[x];
+        if(player.crashWith(b)){
+            player.y = b.y - player.height;
+            player.gravitySpeed = 0.1;
+            player.cj = true;
+            player.js = 0;
+            if(player.speedY > 0){
+                player.speedY = 0;
+            }
+        }
     }
 }
 
@@ -133,6 +145,7 @@ function component(width,height,color,x,y,type) {
     this.speedX =0;
     this.speedY =0;
     this.js =0;
+    // cj is a boolean variable (i.e. true or false)
     this.cj =false;
 
     this.update = function() {
@@ -151,10 +164,7 @@ function component(width,height,color,x,y,type) {
       var othertop = otherobj.y;
       var otherbottom = otherobj.y + (otherobj.height);
       var crash = true;
-      if ((mybottom < othertop) ||
-      (mytop > otherbottom) ||
-      (myright < otherleft) ||
-      (myleft > otherright)) {
+      if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
         crash = false;
       }
       return crash;
