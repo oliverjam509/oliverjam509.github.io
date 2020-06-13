@@ -18,13 +18,23 @@ body { margin:0; text-align: center; }
 </style>
 
 <script>
+// CHECKLIST
+// 1. Spikes
+// 2. Wind power
+// 3. Shield
+// 4. Poison block of death and destruction
+// 5. Teleport block (random location)
+// 
+
 // these are global variables they are outside functions
 var x = screen.width/2;
-var player1 = new component(50,50,"blue",900,300,null);
+var player1 = new component(50,50,"blue",1350,300,null);
+var player2 = new component(50,50,"red",450,300,null);
 var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
 var block2 = new component(500,30,"black",50,500,null);
 var block3 = new component(500,30,"black",1300,500,null);
 var blocks = [block1,block2,block3];
+
 
 var mov = -100;
 
@@ -33,7 +43,6 @@ var myGameArea = {
     start : function() {
         this.canvas.width = screen.width;
         this.canvas.height = 810;
-        this.frameNo = 0;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.interval = setInterval(updateGameArea, 20);
@@ -54,31 +63,41 @@ function updateGameArea(){
 
     myGameArea.clear();
 
-    
-
-   
     var x = 50;
    
-    // [A,D,W,S]
-    var controls = [65,68,87,83];
+    // Player1: [A,D,W,S] 
+    // Player2: [Le,Ri,Up,Do] 
+    // p1controls and p2controls are list variable types
+    // They use the ascii keys of corresponding keyboard keys
+    var p1controls = [65,68,87,83];
+    var p2controls = [37,39,38,40];
      
-    updatePlayerPosition(player1, controls);
+    updatePlayerPosition(player1, p1controls);
+    updatePlayerPosition(player2, p2controls);
 
     boundsCheck(player1);
+    boundsCheck(player2);
 
+// makes the player move by changing the coordinates x and y 
     player1.x += player1.speedX;
     player1.y += player1.speedY;
 
+    player2.x += player2.speedX;
+    player2.y += player2.speedY;
+
     player1.update();
+    player2.update();
     block1.update();
     block2.update();
     block3.update();
+    
 }
 
 function updatePlayerPosition(player, controls){
     var spd = 10;
     player.speedX = 0;
     player.speedY = 0;
+    // [todo] terminal velocity
     player.gravitySpeed += player.gravity;
     player.speedY += player.gravitySpeed;
     player.speedY += player.js;
@@ -91,10 +110,10 @@ function updatePlayerPosition(player, controls){
     }
     // jump
     if ((myGameArea.keys && myGameArea.keys[controls[2]])) {
-        if (player1.cj == true){
-            player1.js = -20;
-            player1.y += player1.js; 
-            player1.cj = false;
+        if (player.cj == true){
+            player.js = -20;
+            player.y += player.js; 
+            player.cj = false;
         }
     }
     if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
@@ -145,15 +164,18 @@ function component(width,height,color,x,y,type) {
     this.speedX =0;
     this.speedY =0;
     this.js =0;
-    // cj is a boolean variable (i.e. true or false)
+    // cj (canjump) is a boolean variable (i.e. true or false)
     this.cj =false;
 
+    // this.update draws the component in myGameArea
     this.update = function() {
         ctx = myGameArea.context;
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
+    // this detects when component hits 'otherobj'
+    // returns a boolean var
     this.crashWith = function(otherobj) {
       var myleft = this.x;
       var myright = this.x + (this.width);
@@ -170,7 +192,6 @@ function component(width,height,color,x,y,type) {
       return crash;
     }
 }
-
 
 function clear() {
     myGameArea.clear();
