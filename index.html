@@ -25,19 +25,6 @@ body { margin:0; text-align: center; }
 // 4. Poison block of death and destruction
 // 5. Teleport block (random location)
 // 
-
-// these are global variables they are outside functions
-var x = screen.width/2;
-var player1 = new component(50,50,"blue",1350,300,null);
-var player2 = new component(50,50,"red",450,300,null);
-var block1 = new component(x,30,"black",(screen.width-x)/2,600,null);
-var block2 = new component(500,30,"black",50,500,null);
-var block3 = new component(500,30,"black",1300,500,null);
-var blocks = [block1,block2,block3];
-
-
-var mov = -100;
-
 var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
@@ -58,9 +45,24 @@ var myGameArea = {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
+// these are global variables they are outside functions
+var blockHeight = myGameArea.canvas.height/5;
+
+var player1 = new component(screen.width/38,50,"blue",1350,300,null);
+var player2 = new component(screen.width/38,50,"red",450,300,null);
+var block1 = new component(screen.width/2, blockHeight, "black", (screen.width-screen.width/2)/2, 600 ,null);
+var block2 = new component(screen.width/4, blockHeight, "black", 50, 500, null);
+var block3 = new component(screen.width/4, blockHeight, "black", 1300, 500, null);
+var blocks = [block1,block2,block3];
+// fix screen.height
+
+
+var mov = -100;
+
+
 
 function updateGameArea(){
-
+    document.getElementById("p1").innerHTML = screen.width;
     myGameArea.clear();
 
     var x = 50;
@@ -123,7 +125,6 @@ function updatePlayerPosition(player, controls){
     var x;
 
     for(x = 0; x <= blocks.length-1; x++){
-        document.getElementById("p1").innerHTML = x;
         var b = blocks[x];
         if(player.crashWith(b)){
             player.y = b.y - player.height;
