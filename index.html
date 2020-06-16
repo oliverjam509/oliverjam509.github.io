@@ -48,12 +48,17 @@ var myGameArea = {
 // these are global variables they are outside functions
 var blockHeight = myGameArea.canvas.height/5;
 
-var player1 = new component(screen.width/38,50,"blue",1350,300,null);
-var player2 = new component(screen.width/38,50,"red",450,300,null);
+var player1 = new component(screen.width/38,screen.width/38,"blue",1350,300,null);
+var player2 = new component(screen.width/38,screen.width/38.,"red",450,300,null);
 var block1 = new component(screen.width/2, blockHeight, "black", (screen.width-screen.width/2)/2, 600 ,null);
-var block2 = new component(screen.width/4, blockHeight, "black", 50, 500, null);
-var block3 = new component(screen.width/4, blockHeight, "black", 1300, 500, null);
-var blocks = [block1,block2,block3];
+var block2 = new component(screen.width/4, blockHeight, "black", 150, 450, null);
+var block3 = new component(screen.width/4, blockHeight, "black", 1200, 450, null);
+var pb1 = new component(screen.width, blockHeight, "red", 0, 800, null);
+
+var blocks = [block1,block2,block3,pb1];
+
+
+var obs = [pb1];
 // fix screen.height
 
 
@@ -62,8 +67,8 @@ var mov = -100;
 
 
 function updateGameArea(){
-    document.getElementById("p1").innerHTML = screen.width;
     myGameArea.clear();
+    document.getElementById("p1").innerHTML = screen.width;
 
     var x = 50;
    
@@ -87,6 +92,7 @@ function updateGameArea(){
     player2.x += player2.speedX;
     player2.y += player2.speedY;
 
+    pb1.update();
     player1.update();
     player2.update();
     block1.update();
@@ -123,7 +129,16 @@ function updatePlayerPosition(player, controls){
     }
 
     var x;
+    for(x = 0; x <= obs.length-1; x++){
+        var pb = obs[x];
+        if(player.crashWith(pb)){
+            reset();
 
+        }
+    }
+
+    // Check if player has crashed with an object
+    var x;
     for(x = 0; x <= blocks.length-1; x++){
         var b = blocks[x];
         if(player.crashWith(b)){
@@ -136,6 +151,13 @@ function updatePlayerPosition(player, controls){
             }
         }
     }
+}
+
+function reset(){
+    player1.x = 1350;
+    player1.y = 300;
+    player2.x = 450;
+    player2.y = 300;
 }
 
 function boundsCheck(sweatynerd){
