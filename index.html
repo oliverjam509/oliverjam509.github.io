@@ -19,11 +19,10 @@ body { margin:0; text-align: center; }
 
 <script>
 // CHECKLIST
-// 1. Spikes
-// 2. Wind power
-// 3. Shield
-// 4. Poison block of death and destruction
-// 5. Teleport block (random location)
+// 1. Wind power
+// 2. Shield
+// 3. Teleport block (random location)
+//4. make death screen
 // 
 var myGameArea = {
     canvas : document.createElement("canvas"),
@@ -48,12 +47,14 @@ var myGameArea = {
 // these are global variables they are outside functions
 var blockHeight = myGameArea.canvas.height/5;
 
+// component(width,height,color,x,y,type,face)
 var player1 = new component(screen.width/38,screen.width/38,"blue",1350,300,null);
-var player2 = new component(screen.width/38,screen.width/38.,"red",450,300,null);
+var player2 = new component(screen.width/38,screen.width/38.,"red",450,300,null,);
 var block1 = new component(screen.width/2, blockHeight, "black", (screen.width-screen.width/2)/2, 600 ,null);
 var block2 = new component(screen.width/4, blockHeight, "black", 150, 450, null);
 var block3 = new component(screen.width/4, blockHeight, "black", 1200, 450, null);
 var pb1 = new component(screen.width, blockHeight, "red", 0, 800, null);
+var sl = new component(player1.width/3, player1.height/3, "#3366ff",10,10,null);
 
 var blocks = [block1,block2,block3,pb1];
 
@@ -65,19 +66,16 @@ var obs = [pb1];
 var mov = -100;
 
 
-
 function updateGameArea(){
     myGameArea.clear();
-    document.getElementById("p1").innerHTML = screen.width;
-
     var x = 50;
    
-    // Player1: [A,D,W,S] 
-    // Player2: [Le,Ri,Up,Do] 
+    // Player1: [A,D,W,C] 
+    // Player2: [Le,Ri,Up,M] 
     // p1controls and p2controls are list variable types
     // They use the ascii keys of corresponding keyboard keys
-    var p1controls = [65,68,87,83];
-    var p2controls = [37,39,38,40];
+    var p1controls = [65,68,87,67];
+    var p2controls = [37,39,38,77];
      
     updatePlayerPosition(player1, p1controls);
     updatePlayerPosition(player2, p2controls);
@@ -98,6 +96,7 @@ function updateGameArea(){
     block1.update();
     block2.update();
     block3.update();
+    sl.update();
     
 }
 
@@ -125,7 +124,9 @@ function updatePlayerPosition(player, controls){
         }
     }
     if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
-        player.speedY = spd;
+        shoot();
+        document.getElementById("p1").innerHTML = "shoot";
+
     }
 
     var x;
@@ -153,6 +154,16 @@ function updatePlayerPosition(player, controls){
     }
 }
 
+
+
+
+
+function shoot(){
+
+}
+    
+
+
 function reset(){
     player1.x = 1350;
     player1.y = 300;
@@ -175,13 +186,14 @@ function boundsCheck(sweatynerd){
     }
 }
 
-function component(width,height,color,x,y,type) {
+function component(width,height,color,x,y,type,face) {
 	this.width=width;
 	this.height=height;
 	this.color=color;
 	this.x=x;
 	this.y=y;
-	this.type=type;	
+	this.type=type;
+    this.face=face	
     this.gravity =1;
     this.gravitySpeed = 0;
     this.speedX =0;
