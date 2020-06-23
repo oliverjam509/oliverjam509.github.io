@@ -54,16 +54,21 @@ var block1 = new component(screen.width/2, blockHeight, "black", (screen.width-s
 var block2 = new component(screen.width/4, blockHeight, "black", 150, 450, null);
 var block3 = new component(screen.width/4, blockHeight, "black", 1200, 450, null);
 var pb1 = new component(screen.width, blockHeight, "red", 0, 800, null);
-var sl = new component(player1.width/3, player1.height/3, "#ffff00",10,10,null);
-
 var blocks = [block1,block2,block3,pb1];
-
+var p1missile;
+var p2missile;
 
 var obs = [pb1];
 // fix screen.height
 
 
 var mov = -100;
+
+function startGame(){
+    myGameArea.start();
+    p1missile = null;
+    p2missile = null;
+}
 
 
 function updateGameArea(){
@@ -90,7 +95,6 @@ function updateGameArea(){
     player2.x += player2.speedX;
     player2.y += player2.speedY;
 
-    pb1.update();
     player1.update();
     player2.update();
     block1.update();
@@ -99,6 +103,8 @@ function updateGameArea(){
     sl.update();
     
 }
+
+
 
 function updatePlayerPosition(player, controls){
     var spd = 10;
@@ -109,22 +115,12 @@ function updatePlayerPosition(player, controls){
     player.speedY += player.gravitySpeed;
     player.speedY += player.js;
 
-    if ((myGameArea.keys && myGameArea.keys[controls[0]])) {
-        player.speedX = -spd;
-    }
-    if ((myGameArea.keys && myGameArea.keys[controls[1]])) {
-        player.speedX = spd;
-    }
+    if ((myGameArea.keys && myGameArea.keys[controls[0]])) player.speedX = -spd;
+    if ((myGameArea.keys && myGameArea.keys[controls[1]])) player.speedX = spd;
     // jump
-    if ((myGameArea.keys && myGameArea.keys[controls[2]])) {
-        if (player.cj == true){
-            player.js = -20;
-            player.y += player.js; 
-            player.cj = false;
-        }
-    }
+    if ((myGameArea.keys && myGameArea.keys[controls[2]])) jump(player);
     if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
-        shoot();
+        shoot(player);
         document.getElementById("p1").innerHTML = "shoot";
 
     }
@@ -154,15 +150,39 @@ function updatePlayerPosition(player, controls){
     }
 }
 
-
-
-
-
-function shoot(){
-
+function jump(player){
+    if (player.cj == true){
+        player.js = -20;
+        player.y += player.js; 
+        player.cj = false;
+    }
 }
-    
 
+function shoot(player){
+    if(player == player1) {
+      if(p1missile == null) {
+         p1missile = new component(player.width, 10, "red", player.x, player.y-30);
+          p1missile.update();
+      }
+    }else if (player == player2){
+      if(p2missile == null) {
+          p2missile = new component(player.width, 10, "lightblue", player.x, player.y+40);
+          p2missile.update();
+      }
+    }
+}
+function updateShot(shot, s){
+    if (shot != null) {
+        if (shot.y < 0 || shot.y > myGameArea.canvas.height) {
+            if(shot == p1missile) {p1missile = null;}
+            if(shot == p2missile) {p2missile = null;}
+    } else {
+      shot.x -= 4;
+      shot.newPos();
+      shot.update();
+    }
+  }
+}
 
 function reset(){
     player1.x = 1350;
@@ -208,7 +228,10 @@ function component(width,height,color,x,y,type,face) {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
-
+    this.newPos = function() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+    }
     // this detects when component hits 'otherobj'
     // returns a boolean var
     this.crashWith = function(otherobj) {
@@ -232,10 +255,6 @@ function clear() {
     myGameArea.clear();
 }
 
-function startGame(){
-	myGameArea.start();
-    
-}
 
 </script>
 
