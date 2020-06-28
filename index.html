@@ -48,19 +48,16 @@ var myGameArea = {
 var blockHeight = myGameArea.canvas.height/5;
 
 // component(width,height,color,x,y,type,face)
+// change x and y to relative values
 var player1 = new component(screen.width/38,screen.width/38,"blue",1350,300,null);
 var player2 = new component(screen.width/38,screen.width/38.,"red",450,300,null,);
 var block1 = new component(screen.width/2, blockHeight, "black", (screen.width-screen.width/2)/2, 600 ,null);
-var block2 = new component(screen.width/4, blockHeight, "black", 150, 450, null);
-var block3 = new component(screen.width/4, blockHeight, "black", 1200, 450, null);
+var block2 = new component(screen.width/4, blockHeight, "black", screen.width * 0.1, screen.height * 0.4, null);
+var block3 = new component(screen.width/4, blockHeight, "black", screen.width * 0.65, screen.height * 0.4, null);
 var pb1 = new component(screen.width, blockHeight, "red", 0, 800, null);
 var blocks = [block1,block2,block3,pb1];
 var p1missile;
 var p2missile;
-
-var obs = [pb1];
-// fix screen.height
-
 
 var mov = -100;
 
@@ -68,6 +65,7 @@ function startGame(){
     myGameArea.start();
     p1missile = null;
     p2missile = null;
+    
 }
 
 
@@ -85,26 +83,23 @@ function updateGameArea(){
     updatePlayerPosition(player1, p1controls);
     updatePlayerPosition(player2, p2controls);
 
+    var P1obs = [pb1, p2missile];
+    var P2obs = [pb1, p1missile];
+    collisions(player1, P1obs);
+    collisions(player2, P2obs)
+
+    updateShot(p1missile);
+    updateShot(p2missile);
+
     boundsCheck(player1);
     boundsCheck(player2);
-
-// makes the player move by changing the coordinates x and y 
-    player1.x += player1.speedX;
-    player1.y += player1.speedY;
-
-    player2.x += player2.speedX;
-    player2.y += player2.speedY;
-
+  
     player1.update();
     player2.update();
     block1.update();
     block2.update();
-    block3.update();
-    sl.update();
-    
+    block3.update();    
 }
-
-
 
 function updatePlayerPosition(player, controls){
     var spd = 10;
@@ -115,26 +110,39 @@ function updatePlayerPosition(player, controls){
     player.speedY += player.gravitySpeed;
     player.speedY += player.js;
 
-    if ((myGameArea.keys && myGameArea.keys[controls[0]])) player.speedX = -spd;
-    if ((myGameArea.keys && myGameArea.keys[controls[1]])) player.speedX = spd;
+    // Player1: [A,D,W,C] 
+    // Player2: [Le,Ri,Up,M] 
+
+    if ((myGameArea.keys && myGameArea.keys[controls[0]])) {
+        player.speedX = -spd;
+        player.ld = true;
+    }
+    if ((myGameArea.keys && myGameArea.keys[controls[1]])){
+        player.speedX = spd;   
+        player.ld = false;
+    }
     // jump
+
     if ((myGameArea.keys && myGameArea.keys[controls[2]])) jump(player);
     if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
         shoot(player);
-        document.getElementById("p1").innerHTML = "shoot";
-
     }
+    
+}
 
+function collisions(player, obs){
     var x;
     for(x = 0; x <= obs.length-1; x++){
         var pb = obs[x];
-        if(player.crashWith(pb)){
-            reset();
-
+        if(pb != null){
+                document.getElementById("p1").innerHTML = "fail";
+            if(player.crashWith(pb)){
+                reset();
+            }
         }
     }
 
-    // Check if player has crashed with an object
+    // Check if player has crashed with an object and stop them falling if they have
     var x;
     for(x = 0; x <= blocks.length-1; x++){
         var b = blocks[x];
@@ -159,29 +167,33 @@ function jump(player){
 }
 
 function shoot(player){
+    var s = 16;
+    if(player.ld) s = s* -1
     if(player == player1) {
       if(p1missile == null) {
-         p1missile = new component(player.width, 10, "red", player.x, player.y-30);
-          p1missile.update();
+         p1missile = new component(20, 20, "#9999ff", player1.x+(player1.width/3), player1.y, null);
+         p1missile.speedX = s;
+         p1missile.update();
       }
     }else if (player == player2){
       if(p2missile == null) {
-          p2missile = new component(player.width, 10, "lightblue", player.x, player.y+40);
+          p2missile = new component(20, 20, "#e60000", player2.x+(player2.width/3), player2.y, null);
+          p2missile.speedX = s;
           p2missile.update();
       }
     }
 }
-function updateShot(shot, s){
+
+function updateShot(shot){
     if (shot != null) {
-        if (shot.y < 0 || shot.y > myGameArea.canvas.height) {
+        if (shot.x < 0 || shot.x > myGameArea.canvas.width) {
             if(shot == p1missile) {p1missile = null;}
             if(shot == p2missile) {p2missile = null;}
-    } else {
-      shot.x -= 4;
-      shot.newPos();
-      shot.update();
+        }else{
+            shot.newPos();
+            shot.update(); 
+        }
     }
-  }
 }
 
 function reset(){
@@ -189,21 +201,16 @@ function reset(){
     player1.y = 300;
     player2.x = 450;
     player2.y = 300;
+    p1missile = null;
+    p2missile = null;
 }
 
-function boundsCheck(sweatynerd){
-    if(sweatynerd.x<0){
-        sweatynerd.x=screen.width;
-    }
-    if(sweatynerd.x>screen.width){
-        sweatynerd.x=0;
-    }
-    if (sweatynerd.y>=myGameArea.canvas.height-sweatynerd.height){
-        sweatynerd.y = 0;
-    }
-    if (sweatynerd.y<0){
-        sweatynerd.y = myGameArea.canvas.height;
-    }
+function boundsCheck(player){
+    if(player.x<0) player.x=screen.width;
+    if(player.x>screen.width) player.x=0;
+    if(player.y>=myGameArea.canvas.height-player.height) player.y = 0;
+    if(player.y<0) player.y = myGameArea.canvas.height;
+    player.newPos();
 }
 
 function component(width,height,color,x,y,type,face) {
@@ -221,6 +228,8 @@ function component(width,height,color,x,y,type,face) {
     this.js =0;
     // cj (canjump) is a boolean variable (i.e. true or false)
     this.cj =false;
+    // ld is left direction (boolean)
+    this.ld = true;
 
     // this.update draws the component in myGameArea
     this.update = function() {
