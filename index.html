@@ -28,7 +28,7 @@ var myGameArea = {
     canvas : document.createElement("canvas"),
     start : function() {
         this.canvas.width = screen.width;
-        this.canvas.height = 810;
+        this.canvas.height = screen.height * 0.75;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.interval = setInterval(updateGameArea, 20);
@@ -49,8 +49,8 @@ var blockHeight = myGameArea.canvas.height/5;
 
 // component(width,height,color,x,y,type,face)
 // change x and y to relative values
-var player1 = new component(screen.width/38,screen.width/38,"blue",1350,300,null);
-var player2 = new component(screen.width/38,screen.width/38.,"red",450,300,null,);
+var player1;
+var player2;
 var block1 = new component(screen.width/2, blockHeight, "black", (screen.width-screen.width/2)/2, 600 ,null);
 var block2 = new component(screen.width/4, blockHeight, "black", screen.width * 0.1, screen.height * 0.4, null);
 var block3 = new component(screen.width/4, blockHeight, "black", screen.width * 0.65, screen.height * 0.4, null);
@@ -58,14 +58,22 @@ var pb1 = new component(screen.width, blockHeight, "red", 0, 800, null);
 var blocks = [block1,block2,block3,pb1];
 var p1missile;
 var p2missile;
+var p1deaths;
+var p2deaths;
 
 var mov = -100;
 
 function startGame(){
+    var p1Col = "blue";
+    var p2Col = "#ff1a8c";
+
     myGameArea.start();
     p1missile = null;
     p2missile = null;
-    
+    p2deaths = new component("30px", "Consolas", p2Col, 40, 40, "text");
+    player2 = new component(screen.width/38,screen.width/38.,p2Col,450,300,null,);
+    p1deaths = new component("30px", "Consolas", p1Col, myGameArea.canvas.width * 0.9, 40, "text");
+    player1 = new component(screen.width/38, screen.width/38, p1Col, 1350, 300, null);
 }
 
 
@@ -73,12 +81,13 @@ function updateGameArea(){
     myGameArea.clear();
     var x = 50;
    
-    // Player1: [A,D,W,C] 
-    // Player2: [Le,Ri,Up,M] 
+    // Player1: [A,D,W,C,V] 
+    // Player2: [Le,Ri,Up,N,M] 
+    // Left, Right, Up, Shoot, Stone
     // p1controls and p2controls are list variable types
     // They use the ascii keys of corresponding keyboard keys
-    var p1controls = [65,68,87,67];
-    var p2controls = [37,39,38,77];
+    var p1controls = [65,68,87,67,86];
+    var p2controls = [37,39,38,78,77];
      
     updatePlayerPosition(player1, p1controls);
     updatePlayerPosition(player2, p2controls);
@@ -93,7 +102,11 @@ function updateGameArea(){
 
     boundsCheck(player1);
     boundsCheck(player2);
-  
+
+    p1deaths.text = "P1 Dths: " + player1.deaths;
+    p2deaths.text = "P2 Dths: " + player2.deaths;
+    p1deaths.update();
+    p2deaths.update();
     player1.update();
     player2.update();
     block1.update();
@@ -127,7 +140,14 @@ function updatePlayerPosition(player, controls){
     if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
         shoot(player);
     }
+    if ((myGameArea.keys && myGameArea.keys[controls[4]])) {
+        stoneForm(player);
+    }
     
+}
+
+function stoneForm(player){
+
 }
 
 function collisions(player, obs){
@@ -137,6 +157,7 @@ function collisions(player, obs){
         if(pb != null){
                 document.getElementById("p1").innerHTML = "fail";
             if(player.crashWith(pb)){
+                player.deaths += 1;
                 reset();
             }
         }
@@ -167,11 +188,11 @@ function jump(player){
 }
 
 function shoot(player){
-    var s = 16;
-    if(player.ld) s = s* -1
+    var s = 35;
+    if(player.ld) s = s* -1;
     if(player == player1) {
       if(p1missile == null) {
-         p1missile = new component(20, 20, "#9999ff", player1.x+(player1.width/3), player1.y, null);
+         p1missile = new component(20, 20, "#3333cc", player1.x+(player1.width/3), player1.y, null);
          p1missile.speedX = s;
          p1missile.update();
       }
@@ -213,14 +234,13 @@ function boundsCheck(player){
     player.newPos();
 }
 
-function component(width,height,color,x,y,type,face) {
+function component(width,height,color,x,y,type) {
 	this.width=width;
 	this.height=height;
 	this.color=color;
 	this.x=x;
 	this.y=y;
 	this.type=type;
-    this.face=face	
     this.gravity =1;
     this.gravitySpeed = 0;
     this.speedX =0;
@@ -230,13 +250,22 @@ function component(width,height,color,x,y,type,face) {
     this.cj =false;
     // ld is left direction (boolean)
     this.ld = true;
+    this.deaths = 0;
+    this.stone = false;
 
     // this.update draws the component in myGameArea
     this.update = function() {
-        ctx = myGameArea.context;
+      ctx = myGameArea.context;
+      if (this.type == "text") {
+        ctx.font = this.width + " " + this.height;
+        ctx.fillStyle = this.color;
+        ctx.fillText(this.text, this.x, this.y);
+      } else {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
     }
+
     this.newPos = function() {
         this.x += this.speedX;
         this.y += this.speedY;
