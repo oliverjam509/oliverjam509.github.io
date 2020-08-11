@@ -60,6 +60,7 @@ var p1missile;
 var p2missile;
 var p1deaths;
 var p2deaths;
+var teleportboi;
 
 var mov = -100;
 
@@ -67,6 +68,7 @@ function startGame(){
     var p1Col = "blue";
     var p2Col = "#ff1a8c";
 
+    // [TODO] Implement position in terms of screen size
     myGameArea.start();
     p1missile = null;
     p2missile = null;
@@ -74,8 +76,16 @@ function startGame(){
     player2 = new component(screen.width/38,screen.width/38.,p2Col,450,300,null,);
     p1deaths = new component("30px", "Consolas", p1Col, myGameArea.canvas.width * 0.9, 40, "text");
     player1 = new component(screen.width/38, screen.width/38, p1Col, 1350, 300, null);
+    teleportboi = new component(50, 50, "green", 800, 500, null);
 }
 
+function teleport(player){
+    var randwidth = Math.floor((Math.random() * screen.width) + 1);
+    var randheight = Math.floor((Math.random() * screen.height) + 1);
+    player.x = randwidth;
+    player.y = randheight;
+    document.getElementById("p1").innerHTML = randwidth + " " + randheight;
+}
 
 function updateGameArea(){
     myGameArea.clear();
@@ -88,7 +98,12 @@ function updateGameArea(){
     // They use the ascii keys of corresponding keyboard keys
     var p1controls = [65,68,87,67,86];
     var p2controls = [37,39,38,78,77];
-     
+    var p;
+
+    if(player1.crashWith(teleportboi)) p = teleport(player1);
+    if(player2.crashWith(teleportboi)) p = teleport(player2);
+
+
     updatePlayerPosition(player1, p1controls);
     updatePlayerPosition(player2, p2controls);
 
@@ -111,7 +126,8 @@ function updateGameArea(){
     player2.update();
     block1.update();
     block2.update();
-    block3.update();    
+    block3.update();  
+    teleportboi.update();  
 }
 
 function updatePlayerPosition(player, controls){
@@ -135,7 +151,6 @@ function updatePlayerPosition(player, controls){
         player.ld = false;
     }
     // jump
-
     if ((myGameArea.keys && myGameArea.keys[controls[2]])) jump(player);
     if ((myGameArea.keys && myGameArea.keys[controls[3]])) {
         shoot(player);
@@ -146,16 +161,11 @@ function updatePlayerPosition(player, controls){
     
 }
 
-function stoneForm(player){
-
-}
-
 function collisions(player, obs){
     var x;
     for(x = 0; x <= obs.length-1; x++){
         var pb = obs[x];
         if(pb != null){
-                document.getElementById("p1").innerHTML = "fail";
             if(player.crashWith(pb)){
                 player.deaths += 1;
                 reset();
@@ -299,7 +309,8 @@ function clear() {
 <body onload="startGame();">
 
 <p id="p1">my game</p>
-<h1>Controls are-</h1>
+<p>Player1: Shoot = C</p>
+<p>Player2: Shoot = N</p>
 
 </body>
 
